@@ -20,9 +20,24 @@
             align-items: center;
             font-family: 'Quicksand', sans-serif;
             padding: 20px;
+            background: transparent;
         }
 
-        /* POPUP CENTRALIZADO - SEM FUNDO */
+        /* OVERLAY para clique fora */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* POPUP CENTRALIZADO */
         .popup-container {
             background: rgba(10, 20, 30, 0.3);
             backdrop-filter: blur(12px);
@@ -35,6 +50,8 @@
             box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(135, 207, 235, 0.2);
             animation: dreamAppear 0.8s ease;
             margin: auto;
+            cursor: default;
+            pointer-events: auto;
         }
 
         @keyframes dreamAppear {
@@ -111,6 +128,10 @@
             display: inline-block;
             animation: dreamFloat 3s infinite ease-in-out;
             filter: drop-shadow(0 0 20px rgba(135, 207, 235, 0.5));
+        }
+
+        .update-icon::before {
+            content: "🌟";
         }
 
         @keyframes dreamFloat {
@@ -192,33 +213,6 @@
             border: 1px dashed #87ceeb;
         }
 
-        .btn-update {
-            background: linear-gradient(135deg, rgba(135, 207, 235, 0.2), rgba(255, 255, 255, 0.1));
-            border: 2px solid #87ceeb;
-            color: white;
-            padding: 10px 30px;
-            font-size: 1.1em;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-family: 'Quicksand', sans-serif;
-            box-shadow: 0 0 20px rgba(135, 207, 235, 0.3);
-            width: auto;
-            min-width: 200px;
-        }
-
-        .btn-update:hover {
-            background: linear-gradient(135deg, rgba(135, 207, 235, 0.3), rgba(255, 255, 255, 0.2));
-            transform: scale(1.05) translateY(-2px);
-            border-color: #ffd700;
-            box-shadow: 0 10px 30px rgba(135, 207, 235, 0.4);
-        }
-
         .stars-decoration {
             position: absolute;
             top: 10px;
@@ -232,6 +226,10 @@
         .stars-decoration.right {
             left: auto;
             right: 15px;
+        }
+
+        .stars-decoration::before {
+            content: "✦ ✦ ✦";
         }
 
         @keyframes twinkle {
@@ -267,53 +265,55 @@
     </style>
 </head>
 <body style="background: transparent;">
-    <!-- POPUP CENTRALIZADO - SEM FUNDO EXTERNO -->
-    <div class="popup-container">
-        <div class="stars-decoration"></div>
-        <div class="stars-decoration right"></div>
-        
-        <div class="particles-popup" id="particlesPopup"></div>
-        
-        <button class="close-btn" onclick="fecharPopup()">&times;</button>
-        
-        <div class="popup-content">
-            <div class="update-icon"></div>
-            <h2>ATUALIZAÇÃO</h2>
-            <div class="version-badge" id="versaoAtual"></div>
+    <!-- OVERLAY para clique fora -->
+    <div class="popup-overlay" id="popupOverlay" onclick="fecharPopup()">
+        <!-- POPUP CENTRALIZADO -->
+        <div class="popup-container" onclick="event.stopPropagation()">
+            <div class="stars-decoration"></div>
+            <div class="stars-decoration right"></div>
             
-            <div class="update-title" id="tituloAtualizacao">
+            <div class="particles-popup" id="particlesPopup"></div>
+            
+            <button class="close-btn" onclick="fecharPopup()">&times;</button>
+            
+            <div class="popup-content">
+                <div class="update-icon"></div>
+                <h2>ATUALIZAÇÃO</h2>
+                <div class="version-badge" id="versaoAtual">v1.0.0</div>
                 
-            </div>
-            
-            <div class="update-grid" id="updateGrid"></div>
-            
-            <div class="update-footer" id="footerAtualizacao">
+                <div class="update-title" id="tituloAtualizacao">
+                    Título da Atualização
+                </div>
                 
+                <div class="update-grid" id="updateGrid"></div>
+                
+                <div class="update-footer" id="footerAtualizacao">
+                    ✦ Novidades disponíveis ✦
+                </div>
             </div>
-            
         </div>
     </div>
 
     <script>
         // DADOS DA ATUALIZAÇÃO - EDITAR AQUI
         const updateData = {
-            versao: "",
-            titulo: "",
-            footer: "",
+            versao: "1.0.0",
+            titulo: "Nova Atualização",
+            footer: "✦ Novidades disponíveis ✦",
             categorias: [
                 {
-                    titulo: "NOVO",
-                    itens: ["", "", ""],
+                    titulo: "✨ NOVO",
+                    itens: ["Modo Co-op", "Progressão", "Loja"],
                     destaque: true
                 },
                 {
-                    titulo: ",
-                    itens: ["", "", ""],
+                    titulo: "🎮 MELHORIAS",
+                    itens: ["Performance", "Efeitos", "Interface"],
                     destaque: false
                 },
                 {
-                    titulo: "CORREÇÕES",
-                    itens: ["", "", ""],
+                    titulo: "🔧 CORREÇÕES",
+                    itens: ["Bugs", "Áudio", "Fases"],
                     destaque: false
                 }
             ]
@@ -327,12 +327,16 @@
             const container = document.getElementById('particlesPopup');
             if (!container) return;
             
+            // Limpar partículas existentes
+            container.innerHTML = '';
+            
             for (let i = 0; i < 15; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 
-                particle.style.width = (Math.random() * 4 + 1) + 'px';
-                particle.style.height = particle.style.width;
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
                 particle.style.left = Math.random() * 100 + '%';
                 particle.style.animationDelay = Math.random() * 8 + 's';
                 particle.style.animationDuration = Math.random() * 10 + 5 + 's';
@@ -371,6 +375,9 @@
             // Se estiver dentro de um iframe, tenta comunicar com o pai
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage('fecharPopup', '*');
+            } else {
+                // Se não estiver em iframe, apenas esconde (opcional)
+                document.getElementById('popupOverlay').style.display = 'none';
             }
         }
 
@@ -385,10 +392,11 @@
             setDados: function(novosDados) {
                 Object.assign(updateData, novosDados);
                 renderizarAtualizacoes();
-            }
+            },
+            fechar: fecharPopup
         };
 
-        console.log('✨ Popup carregado!');
+        console.log('✨ Popup carregado! Clique fora para fechar.');
     </script>
 </body>
 </html>
