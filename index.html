@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nota de Atualização</title>
+    <title>Nota de Atualização - Landscape</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         
@@ -37,20 +37,34 @@
             cursor: pointer;
         }
 
-        /* POPUP CENTRALIZADO E REDUZIDO */
+        /* POPUP CENTRALIZADO FORMATO LANDSCAPE */
         .popup-container {
             background: rgba(20, 25, 30, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 24px;
-            max-width: 380px; /* Reduzido para caber melhor na tela */
+            max-width: 720px; /* Largura expandida para formato deitado */
             width: 100%;
+            max-height: 90vh; /* Evita que saia da tela verticalmente */
+            overflow-y: auto; /* Adiciona rolagem se o conteúdo for muito grande */
             position: relative;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s ease-out;
             margin: auto;
             cursor: default;
             pointer-events: auto;
+        }
+
+        /* Estilização da barra de rolagem (caso precise) */
+        .popup-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .popup-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .popup-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
 
         @keyframes fadeIn {
@@ -89,7 +103,7 @@
         }
 
         .popup-content {
-            text-align: left; /* Alinhamento à esquerda para tom mais formal */
+            text-align: left;
             color: white;
         }
 
@@ -97,7 +111,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -123,25 +137,35 @@
         .update-title {
             font-size: 0.95em;
             color: #cbd5e1;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             font-weight: 500;
         }
 
+        /* GRID HORIZONTAL */
         .update-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Divide em 3 colunas iguais */
+            gap: 16px;
+        }
+
+        /* Responsividade para telas muito pequenas no modo landscape */
+        @media (max-width: 550px) {
+            .update-grid {
+                grid-template-columns: 1fr; /* Volta para 1 coluna se a tela for muito pequena */
+            }
         }
 
         .update-category {
             background: rgba(255, 255, 255, 0.02);
             border-left: 3px solid #475569;
             border-radius: 0 4px 4px 0;
-            padding: 10px 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
         }
 
         .update-category.feature-new {
-            border-left-color: #10b981; /* Verde esmeralda para destacar novidades */
+            border-left-color: #10b981;
             background: rgba(16, 185, 129, 0.03);
         }
 
@@ -150,7 +174,7 @@
             font-size: 0.85em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-weight: 600;
         }
 
@@ -161,7 +185,7 @@
         .update-items {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .update-items span {
@@ -179,8 +203,8 @@
         }
 
         .update-footer {
-            margin-top: 20px;
-            text-align: center;
+            margin-top: 24px;
+            text-align: right;
             color: #64748b;
             font-size: 0.75em;
         }
@@ -211,11 +235,11 @@
     </div>
 
     <script>
-        // DADOS DA ATUALIZAÇÃO - EDITAR AQUI (Sem emojis)
+        // DADOS DA ATUALIZAÇÃO - EDITAR AQUI
         const updateData = {
             versao: "1.0.0",
             titulo: "Atualização de Sistema & Balanceamento",
-            footer: "Sistemas operacionais atualizados.",
+            footer: "Todos os sistemas operacionais atualizados.",
             categorias: [
                 {
                     titulo: "NOVO CONTEÚDO",
@@ -229,7 +253,7 @@
                 },
                 {
                     titulo: "CORREÇÕES DE BUGS",
-                    itens: ["Correção de falha de áudio no menu", "Ajuste de colisão nas fases 2 e 3"],
+                    itens: ["Correção de falha de áudio no menu", "Ajuste de colisão nas fases 2 e 3", "Correção de lentidão no inventário"],
                     destaque: false
                 }
             ]
@@ -283,8 +307,6 @@
             },
             fechar: fecharPopup
         };
-
-        console.log('Patch notes iniciados.');
     </script>
 </body>
 </html>
