@@ -1,1 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Atualização</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 15px;
+            background: transparent;
+        }
+
+        /* OVERLAY para clique fora */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+
+        /* POPUP CENTRALIZADO E REDUZIDO */
+        .popup-container {
+            background: rgba(20, 25, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 380px; /* Reduzido para caber melhor na tela */
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+            margin: auto;
+            cursor: default;
+            pointer-events: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 20px;
+            color: #94a3b8;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .popup-content {
+            text-align: left; /* Alinhamento à esquerda para tom mais formal */
+            color: white;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .popup-content h2 {
+            font-size: 1.2em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #f8fafc;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .update-title {
+            font-size: 0.95em;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .update-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .update-category {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid #475569;
+            border-radius: 0 4px 4px 0;
+            padding: 10px 14px;
+        }
+
+        .update-category.feature-new {
+            border-left-color: #10b981; /* Verde esmeralda para destacar novidades */
+            background: rgba(16, 185, 129, 0.03);
+        }
+
+        .update-category h3 {
+            color: #94a3b8;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .feature-new h3 {
+            color: #34d399;
+        }
+
+        .update-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .update-items span {
+            color: #e2e8f0;
+            font-size: 0.85em;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .update-items span:before {
+            content: "•";
+            color: #64748b;
+        }
+
+        .update-footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.75em;
+        }
+    </style>
+</head>
+<body style="background: transparent;">
+    <div class="popup-overlay" id="popupOverlay" onclick="fecharPopup()">
+        <div class="popup-container" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="fecharPopup()" aria-label="Fechar">&times;</button>
+            
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h2>NOTAS DO PATCH</h2>
+                    <div class="version-badge" id="versaoAtual">v1.0.0</div>
+                </div>
+                
+                <div class="update-title" id="tituloAtualizacao">
+                    Atualização de Sistema
+                </div>
+                
+                <div class="update-grid" id="updateGrid"></div>
+                
+                <div class="update-footer" id="footerAtualizacao">
+                    Sistemas atualizados com sucesso.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DADOS DA ATUALIZAÇÃO - EDITAR AQUI (Sem emojis)
+        const updateData = {
+            versao: "1.0.0",
+            titulo: "Atualização de Sistema & Balanceamento",
+            footer: "Sistemas operacionais atualizados.",
+            categorias: [
+                {
+                    titulo: "NOVO CONTEÚDO",
+                    itens: ["Adição do Modo Co-op", "Novo sistema de Progressão", "Loja de itens atualizada"],
+                    destaque: true
+                },
+                {
+                    titulo: "MELHORIAS GERAIS",
+                    itens: ["Otimização de performance de rede", "Ajuste fino nos efeitos visuais", "Reformulação da interface de usuário"],
+                    destaque: false
+                },
+                {
+                    titulo: "CORREÇÕES DE BUGS",
+                    itens: ["Correção de falha de áudio no menu", "Ajuste de colisão nas fases 2 e 3"],
+                    destaque: false
+                }
+            ]
+        };
+
+        const updateGrid = document.getElementById('updateGrid');
+
+        // Renderizar atualizações
+        function renderizarAtualizacoes() {
+            if (!updateGrid) return;
+            
+            let html = '';
+            
+            updateData.categorias.forEach(categoria => {
+                html += `
+                    <div class="update-category ${categoria.destaque ? 'feature-new' : ''}">
+                        <h3>${categoria.titulo}</h3>
+                        <div class="update-items">
+                            ${categoria.itens.map(item => `<span>${item}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            updateGrid.innerHTML = html;
+            
+            document.getElementById('versaoAtual').textContent = `v${updateData.versao}`;
+            document.getElementById('tituloAtualizacao').textContent = updateData.titulo;
+            document.getElementById('footerAtualizacao').textContent = updateData.footer;
+        }
+
+        // Fechar popup
+        function fecharPopup() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage('fecharPopup', '*');
+            } else {
+                document.getElementById('popupOverlay').style.display = 'none';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            renderizarAtualizacoes();
+        });
+
+        // API para comunicação
+        window.UpdatePopup = {
+            setDados: function(novosDados) {
+                Object.assign(updateData, novosDados);
+                renderizarAtualizacoes();
+            },
+            fechar: fecharPopup
+        };
+
+        console.log('Patch notes iniciados.');
+    </script>
+</body>
+</html>
