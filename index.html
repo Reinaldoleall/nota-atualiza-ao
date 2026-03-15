@@ -20,7 +20,7 @@
             align-items: center;
             font-family: 'Inter', system-ui, sans-serif;
             padding: 15px;
-            background: transparent;
+            background: #0b0e12; /* fallback escuro */
         }
 
         /* OVERLAY para clique fora */
@@ -35,6 +35,7 @@
             align-items: center;
             background: rgba(0, 0, 0, 0.4);
             cursor: pointer;
+            z-index: 10;
         }
 
         /* POPUP CENTRALIZADO FORMATO LANDSCAPE */
@@ -48,11 +49,12 @@
             max-height: 90vh; /* Evita que saia da tela verticalmente */
             overflow-y: auto; /* Adiciona rolagem se o conteúdo for muito grande */
             position: relative;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             animation: fadeIn 0.3s ease-out;
             margin: auto;
             cursor: default;
             pointer-events: auto;
+            backdrop-filter: blur(4px);
         }
 
         /* Estilização da barra de rolagem (caso precise) */
@@ -200,6 +202,8 @@
         .update-items span:before {
             content: "•";
             color: #64748b;
+            font-size: 1.2em;
+            margin-right: 4px;
         }
 
         .update-footer {
@@ -208,9 +212,31 @@
             color: #64748b;
             font-size: 0.75em;
         }
+
+        /* CANVAS DE PARTÍCULAS - CORRIGIDO */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* clica através do canvas */
+            z-index: 1;
+            display: block;
+            background: transparent;
+        }
+
+        .popup-container {
+            position: relative;
+            z-index: 20; /* acima das partículas e overlay */
+        }
     </style>
 </head>
 <body style="background: transparent;">
+
+    <!-- CANVAS AGORA FORA DO OVERLAY, POSIÇÃO CORRETA -->
+    <canvas id="particles"></canvas>
+
     <div class="popup-overlay" id="popupOverlay" onclick="fecharPopup()">
         <div class="popup-container" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="fecharPopup()" aria-label="Fechar">&times;</button>
@@ -237,23 +263,23 @@
     <script>
         // DADOS DA ATUALIZAÇÃO - EDITAR AQUI
         const updateData = {
-            versao: "1.0.0",
-            titulo: "Atualização de Sistema & Balanceamento",
-            footer: "Todos os sistemas operacionais atualizados.",
+            versao: "9.0.0",
+            titulo: "",
+            footer: "Sistemas Atualizados.",
             categorias: [
-                {
-                    titulo: "NOVO CONTEÚDO",
-                    itens: ["Adição do Modo Co-op", "Novo sistema de Progressão", "Loja de itens atualizada"],
-                    destaque: true
-                },
+{
+    titulo: "INVENTÁRIO E ITENS",
+    itens: ["Sistema de inventário totalmente funcional", "Itens consumíveis com efeitos aplicados", "Equipamentos equipáveis e desequipáveis"],
+    destaque: true
+},
                 {
                     titulo: "MELHORIAS GERAIS",
-                    itens: ["Otimização de performance de rede", "Ajuste fino nos efeitos visuais", "Reformulação da interface de usuário"],
+                    itens: ["Otimização de performance", "Ajuste nos efeitos visuais", "Reformulação da Batalha Com Chefe Enrraizado"],
                     destaque: false
                 },
                 {
                     titulo: "CORREÇÕES DE BUGS",
-                    itens: ["Correção de falha de áudio no menu", "Ajuste de colisão nas fases 2 e 3", "Correção de lentidão no inventário"],
+                    itens: ["Correção de falha de áudio no menu", "Ajuste de colisão nas fases 1 e 2", ""],
                     destaque: false
                 }
             ]
@@ -307,6 +333,101 @@
             },
             fechar: fecharPopup
         };
+
+        // ==================== PARTÍCULAS REFATORADAS (FUNCIONAIS) ====================
+        (function initParticles() {
+            const canvas = document.getElementById("particles");
+            if (!canvas) return;
+
+            const ctx = canvas.getContext("2d");
+
+            let particles = [];
+            let animationFrame;
+            let width, height;
+
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            window.addEventListener("resize", () => {
+                resizeCanvas();
+                // opcional: recriar partículas se quiser redistribuir, mas manteremos
+            });
+
+            resizeCanvas();
+
+            // Cria partículas com posição central + dispersão
+            function createParticle() {
+                // Distribui levemente ao redor do centro para não ficar tudo amontoado
+                const centerX = width / 2;
+                const centerY = height / 2;
+                return {
+                    x: centerX + (Math.random() - 0.5) * 150,
+                    y: centerY + (Math.random() - 0.5) * 100,
+                    vx: (Math.random() - 0.5) * 1.0,  // velocidade mais suave
+                    vy: (Math.random() - 0.5) * 0.8,
+                    size: Math.random() * 3 + 1.2,
+                    life: 80 + Math.floor(Math.random() * 60) // vida variada
+                };
+            }
+
+            // Inicializa com 50 partículas
+            for (let i = 0; i < 55; i++) {
+                particles.push(createParticle());
+            }
+
+            function updateParticles() {
+                // Se canvas sumiu por algum motivo, para
+                if (!ctx || !canvas) return;
+
+                ctx.clearRect(0, 0, width, height);
+
+                // Atualiza e desenha
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+
+                    // Movimento
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.6; // redução gradual
+
+                    // Desenha partícula
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    
+                    // Brilho suave baseado na vida
+                    const opacity = Math.min(0.3, (p.life / 150) * 0.25);
+                    ctx.fillStyle = `rgba(210, 225, 255, ${opacity})`;
+                    ctx.fill();
+
+                    // Se morreu, substitui por nova (reset)
+                    if (p.life <= 0) {
+                        // Reposiciona no centro com nova vida
+                        const centerX = width / 2;
+                        const centerY = height / 2;
+                        p.x = centerX + (Math.random() - 0.5) * 180;
+                        p.y = centerY + (Math.random() - 0.5) * 120;
+                        p.vx = (Math.random() - 0.5) * 1.0;
+                        p.vy = (Math.random() - 0.5) * 0.8;
+                        p.size = Math.random() * 3 + 1.2;
+                        p.life = 100 + Math.random() * 80;
+                    }
+                }
+
+                animationFrame = requestAnimationFrame(updateParticles);
+            }
+
+            // Inicia animação
+            updateParticles();
+
+            // Limpeza em caso de descarte (não essencial, mas boa prática)
+            window.addEventListener('beforeunload', () => {
+                if (animationFrame) cancelAnimationFrame(animationFrame);
+            });
+        })();
     </script>
 </body>
 </html>
